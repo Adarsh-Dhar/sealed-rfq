@@ -1,0 +1,3 @@
+[workspace]
+members = ["programs/veil-rfq"]
+resolver = "2"
