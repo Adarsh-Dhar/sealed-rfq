@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "0.30.1"
+solana_version = "1.18.26"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.devnet]
+veil_rfq_match = "hVEbidVqPG2bpP7uuevMoBBPwCxwQwH6vVeiSm3rBoG"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[workspace]
+members = ["programs/veil-rfq-match"]
+
+[hooks]

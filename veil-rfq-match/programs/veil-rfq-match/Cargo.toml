@@ -1,8 +1,7 @@
 [package]
 name = "veil-rfq-match"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
-anchor-lang = "0.30.1"
-arcium-anchor = "0.15.0"
+anchor-lang.workspace = true
