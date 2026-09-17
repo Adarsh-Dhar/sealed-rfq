@@ -1,20 +1,19 @@
 [toolchain]
-anchor_version = "0.30.1"
-solana_version = "1.18.26"
+anchor_version = "1.0.0"
+solana_version = "3.1.10"
 
 [features]
 resolution = true
 skip-lint = false
 
 [programs.devnet]
-veil_rfq_match = "8zScwwxadJ35AFaB3cHi3ZZwQLg6KzjGGUWFRFx5izGb"
-
-[registry]
-url = "https://api.apr.dev"
+veil_rfq_match = "6gRGKyvy4qJjSCBcxh6uaaSeih1ZxVCDt926Y3Fp8BVC"
 
 [provider]
-cluster = "Devnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
 members = ["programs/veil-rfq-match"]
+
+[hooks]

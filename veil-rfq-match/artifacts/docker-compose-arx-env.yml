@@ -1,0 +1,352 @@
+networks:
+  arx_network:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+  # A second bridge, carrying nothing but URL-argument fixtures.
+  #
+  # `url_jail`'s strict policy refuses RFC1918, so a fixture server on `arx_network` is reachable
+  # only by nodes running a relaxed policy -- a config flag that then exists in production builds
+  # for no production reason. RFC 5737 TEST-NET-3 is not private, so the same server on this bridge
+  # is reachable under the policy the real nodes use, and no flag is needed. The range is reserved
+  # for documentation and never routed, so it collides with nothing real.
+  #
+  # Peer traffic, node addresses and any `nodes_ips` override stay on `arx_network` untouched; the
+  # nodes simply also hold an interface here. Address a fixture server at 203.0.113.90.
+  url_fixture_network:
+    ipam:
+      config:
+        - subnet: 203.0.113.0/24
+services:
+
+  arcium-trusted-dealer:
+    image: "arcium/trusted-dealer:latest"
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/trusted_dealer_config.toml
+        target: /usr/trusted-dealer/trusted_dealer_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/trusted_dealer_logs
+        target: /usr/trusted-dealer/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/td_identity.pem
+        target: /usr/trusted-dealer/identity.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/td_master_seed.json
+        target: /usr/trusted-dealer/master_seed.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      arx_network:
+        ipv4_address: 172.20.0.99
+
+
+  arx-node-0:
+    image: "arcium/arx-node:latest"
+    restart: unless-stopped
+    environment:
+      NODE_IDENTITY_FILE: /usr/arx-node/node-keys/node_identity.pem
+      NODE_KEYPAIR_FILE: /usr/arx-node/node-keys/node_keypair.json
+      OPERATOR_KEYPAIR_FILE: /usr/arx-node/node-keys/operator_keypair.json
+      CALLBACK_AUTHORITY_KEYPAIR_FILE: /usr/arx-node/node-keys/callback_authority_keypair.json
+      NODE_CONFIG_PATH: /usr/arx-node/arx/node_config.toml
+      BLS_PRIVATE_KEY_FILE: /usr/arx-node/node-keys/node_bls_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/arx-node/node-keys/node_x25519_keypair.json
+      ARX_METRICS_HOST: "0.0.0.0"
+    ports:
+      - "127.0.0.1:9091:9091"
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/node_config_0.toml
+        target: /usr/arx-node/arx/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_0.json
+        target: /usr/arx-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_0.json
+        target: /usr/arx-node/node-keys/operator_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_callback_0.json
+        target: /usr/arx-node/node-keys/callback_authority_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/identity_0.pem
+        target: /usr/arx-node/node-keys/node_identity.pem
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/arx_node_logs
+        target: /usr/arx-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_bls_0.json
+        target: /usr/arx-node/node-keys/node_bls_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_x25519_0.json
+        target: /usr/arx-node/node-keys/node_x25519_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/private_shares_node_0
+        target: /usr/arx-node/private-shares
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/public_inputs_node_0
+        target: /usr/arx-node/public-inputs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      arx_network:
+        ipv4_address: 172.20.0.100
+      url_fixture_network: {}
+    
+
+  arx-node-1:
+    image: "arcium/arx-node:latest"
+    restart: unless-stopped
+    environment:
+      NODE_IDENTITY_FILE: /usr/arx-node/node-keys/node_identity.pem
+      NODE_KEYPAIR_FILE: /usr/arx-node/node-keys/node_keypair.json
+      OPERATOR_KEYPAIR_FILE: /usr/arx-node/node-keys/operator_keypair.json
+      CALLBACK_AUTHORITY_KEYPAIR_FILE: /usr/arx-node/node-keys/callback_authority_keypair.json
+      NODE_CONFIG_PATH: /usr/arx-node/arx/node_config.toml
+      BLS_PRIVATE_KEY_FILE: /usr/arx-node/node-keys/node_bls_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/arx-node/node-keys/node_x25519_keypair.json
+      ARX_METRICS_HOST: "0.0.0.0"
+    ports:
+      - "127.0.0.1:9092:9091"
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/node_config_1.toml
+        target: /usr/arx-node/arx/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_1.json
+        target: /usr/arx-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_1.json
+        target: /usr/arx-node/node-keys/operator_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_callback_1.json
+        target: /usr/arx-node/node-keys/callback_authority_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/identity_1.pem
+        target: /usr/arx-node/node-keys/node_identity.pem
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/arx_node_logs
+        target: /usr/arx-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_bls_1.json
+        target: /usr/arx-node/node-keys/node_bls_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/node_x25519_1.json
+        target: /usr/arx-node/node-keys/node_x25519_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/private_shares_node_1
+        target: /usr/arx-node/private-shares
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/public_inputs_node_1
+        target: /usr/arx-node/public-inputs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      arx_network:
+        ipv4_address: 172.20.0.101
+      url_fixture_network: {}
+    
+
+  recovery-node-0:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_0.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_0_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_0.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_0.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+
+  recovery-node-1:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_1.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_1_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_1.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_1.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+
+  recovery-node-2:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_2.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_2_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_2.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_2.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+
+  recovery-node-3:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_3.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_3_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_3.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_3.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+
+  recovery-node-4:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_4.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_4_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_4.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_4.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+
+  recovery-node-5:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_5.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_5_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_5.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_5.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+
+  recovery-node-6:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_6.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_6_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_6.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_6.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+
+  recovery-node-7:
+    image: "arcium/recovery-node:latest"
+    profiles: [recovery-cluster]
+    restart: unless-stopped
+    environment:
+      NODE_KEYPAIR_FILE: /usr/recovery-node/node-keys/node_keypair.json
+      X25519_PRIVATE_KEY_FILE: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    volumes:
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_config_7.toml
+        target: /usr/recovery-node/node_config.toml
+        read_only: false
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/recovery_node_7_logs
+        target: /usr/recovery-node/logs
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_7.json
+        target: /usr/recovery-node/node-keys/node_keypair.json
+      - type: bind
+        source: /Users/adarsh/Documents/rfq/veil-rfq-match/artifacts/localnet/recovery_node_x25519_7.json
+        target: /usr/recovery-node/node-keys/node_x25519_keypair.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
