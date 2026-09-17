@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "programs/veil-rfq-match",
+    "encrypted-ixs",
 ]
 resolver = "2"
 

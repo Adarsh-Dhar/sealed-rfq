@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("hVEbidVqPG2bpP7uuevMoBBPwCxwQwH6vVeiSm3rBoG");
+declare_id!("8zScwwxadJ35AFaB3cHi3ZZwQLg6KzjGGUWFRFx5izGb");
 
 #[program]
 pub mod veil_rfq_match {

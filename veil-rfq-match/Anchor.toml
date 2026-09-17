@@ -7,13 +7,14 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-veil_rfq_match = "hVEbidVqPG2bpP7uuevMoBBPwCxwQwH6vVeiSm3rBoG"
+veil_rfq_match = "8zScwwxadJ35AFaB3cHi3ZZwQLg6KzjGGUWFRFx5izGb"
+
+[registry]
+url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
 members = ["programs/veil-rfq-match"]
-
-[hooks]

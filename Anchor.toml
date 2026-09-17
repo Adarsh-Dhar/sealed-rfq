@@ -1,9 +1,12 @@
+[toolchain]
+solana_version = "1.18.26"
+
 [features]
 resolution = true
 skip-lint = false
 
 [programs.devnet]
-veil_rfq = "5vAQqq7ZFfoL4orYsUKnUbSaJqmYeh88PQCuj451531F"
+veil_rfq = "FMCRZK6bpr1GYx5W2TxCPVjXwW4N1FbDmzGE3yh4Atyd"
 
 [registry]
 url = "https://api.apr.dev"
@@ -17,6 +20,3 @@ members = ["programs/veil-rfq"]
 
 [scripts]
 test = "tsx tests/rfq.test.ts"
-
-[toolchain]
-solana_version = "1.18.26"
